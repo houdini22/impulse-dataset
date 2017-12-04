@@ -12,6 +12,10 @@ namespace Impulse {
             this->data.push_back(sample);
         }
 
+        void Dataset::removeSample(T_Size index) {
+            this->data.erase(this->data.begin() + index);
+        }
+
         void Dataset::out(T_Size limit) {
             for (T_Size i = 0; i < this->getSize(); i++) {
                 if (limit > 0)

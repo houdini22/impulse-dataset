@@ -18,6 +18,8 @@
 #include <utility>
 #include <memory>
 
+#include "../../Vendor/json/src/json.hpp"
+
 #include "common.h"
 #include "DatasetSample.h"
 #include "Dataset.h"

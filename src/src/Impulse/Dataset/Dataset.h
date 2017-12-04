@@ -20,6 +20,8 @@ namespace Impulse {
 
             void addSample(DatasetSampleContainer sample);
 
+            void removeSample(T_Size index);
+
             DatasetData &getSamples();
 
             DatasetSampleContainer getSampleAt(int index);

@@ -1,4 +1,5 @@
 #include "src/Impulse/Dataset/include.h"
+#include <sys/stat.h>
 
 using namespace Impulse::Dataset;
 using namespace std::chrono;
@@ -76,6 +77,9 @@ void test2() {
     categoryId.applyToColumn(0);
     categoryId.applyToColumn(1);
     dataset.out();
+
+    categoryId.saveColumnMapTo(0, "/home/hud/projekty/impulse-ml-dataset-private/src/data/map0.json");
+    categoryId.saveColumnMapTo(1, "/home/hud/projekty/impulse-ml-dataset-private/src/data/map1.json");
 }
 
 void test3() {
@@ -95,19 +99,60 @@ void test4() {
 }
 
 void test5() {
-    DatasetBuilder::CSVBuilder builder("/home/hud/projekty/impulse-ml-dataset/src/data/data.csv");
+    DatasetBuilder::CSVBuilder builder("/home/hud/projekty/impulse-ml-dataset-private/src/data/data2.csv");
     Dataset dataset = builder.build();
     dataset.out();
-    dataset.changeOrdering({3, 2, 1, 0});
-    dataset.out();
+    dataset.changeOrdering({0, 1, 2});
+
+    DatasetModifier::Modifier::CategoryId modifier(dataset);
+    modifier.applyToColumn(0);
+    modifier.applyToColumn(1);
+
+    dataset.out(50);
 }
 
-int main() {
-    test1();
+void run(int argc, char *argv[]) {
+    std::vector<T_String> params(argv, argv + argc);
+
+    DatasetBuilder::CSVBuilder builder(params.at(1));
+    Dataset dataset = builder.build();
+    dataset.changeOrdering(
+            {std::stoi(params.at(3).c_str()), std::stoi(params.at(4).c_str()), std::stoi(params.at(5).c_str())});
+
+    if (params.at(2) == "1") {
+        dataset.removeSample(0);
+    }
+
+    DatasetModifier::Modifier::CategoryId modifier(dataset);
+    modifier.applyToColumn(0);
+    modifier.applyToColumn(1);
+
+    DatasetExporter::CSVExporter exporter(dataset);
+
+    T_String outPath(params.at(6).c_str());
+    mkdir(outPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+    T_String indexPath(outPath);
+    indexPath.append("index.csv");
+    exporter.exportTo(indexPath);
+
+    T_String map0Path(outPath);
+    map0Path.append("map0.json");
+    modifier.saveColumnMapTo(0, map0Path);
+
+    T_String map1Path(outPath);
+    map1Path.append("map1.json");
+    modifier.saveColumnMapTo(1, map1Path);
+}
+
+int main(int argc, char *argv[]) {
+    //test1();
     //test2();
     //test3();
     //test4();
     //test5();
+
+    run(argc, argv);
 
     return 0;
 }

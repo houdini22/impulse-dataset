@@ -14,10 +14,14 @@ namespace Impulse {
             namespace Modifier {
 
                 class CategoryId : public Abstract {
+                protected:
+                    std::map<int, std::map<int, T_String>> map;
                 public:
                     explicit CategoryId(Dataset &dataset) : Abstract(dataset) {}
 
                     void applyToColumn(int columnIndex) override;
+
+                    void saveColumnMapTo(int columnIndex, T_String path);
                 };
             }
         }
