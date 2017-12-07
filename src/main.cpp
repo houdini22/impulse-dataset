@@ -69,7 +69,7 @@ void test1() {
 }
 
 void test2() {
-    DatasetBuilder::CSVBuilder builder("/home/hud/projekty/impulse-ml-dataset/src/data/data2.csv");
+    DatasetBuilder::CSVBuilder builder("/home/hud/projekty/impulse-ml-dataset-private/src/data/data2.csv");
     Dataset dataset = builder.build();
     dataset.out();
 
@@ -124,8 +124,11 @@ void run(int argc, char *argv[]) {
     }
 
     DatasetModifier::Modifier::CategoryId modifier(dataset);
-    modifier.applyToColumn(0);
-    modifier.applyToColumn(1);
+
+#pragma omp parallel for
+    for(int i = 0; i < 2; i++) {
+        modifier.applyToColumn(i);
+    }
 
     DatasetExporter::CSVExporter exporter(dataset);
 
@@ -143,6 +146,28 @@ void run(int argc, char *argv[]) {
     T_String map1Path(outPath);
     map1Path.append("map1.json");
     modifier.saveColumnMapTo(1, map1Path);
+
+    T_String statsPath(outPath);
+    statsPath.append("statistics.json");
+
+    nlohmann::json statsJSON;
+    int numOfRatings = 0;
+
+    DatasetData samples = dataset.getSamples();
+    for (auto &sample : samples) {
+        if(!std::isnan(sample->getColumnToDouble(2))) {
+            numOfRatings++;
+        }
+    }
+
+    statsJSON["subjectsCount"] = modifier.getItemsCount(0);
+    statsJSON["usersCount"] = modifier.getItemsCount(1);
+    statsJSON["ratingsCount"] = numOfRatings;
+    statsJSON["density"] = (double) numOfRatings / (modifier.getItemsCount(0) * modifier.getItemsCount(1));
+
+    std::ofstream out(statsPath);
+    out << statsJSON.dump();
+    out.close();
 }
 
 int main(int argc, char *argv[]) {

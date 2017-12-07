@@ -16,12 +16,15 @@ namespace Impulse {
                 class CategoryId : public Abstract {
                 protected:
                     std::map<int, std::map<int, T_String>> map;
+                    std::map<int, int> itemsCount;
                 public:
                     explicit CategoryId(Dataset &dataset) : Abstract(dataset) {}
 
                     void applyToColumn(int columnIndex) override;
 
                     void saveColumnMapTo(int columnIndex, T_String path);
+
+                    int getItemsCount(int columnIndex);
                 };
             }
         }
